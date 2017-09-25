@@ -9,7 +9,7 @@
 		<name>Units of Measurement project</name>
 		<url>http://unitsofmeasurement.github.io</url>
 	</organization>
-	<version>1.0.8</version>
+	<version>1.0-fix-root.0</version>
 	<packaging>bundle</packaging>
 	<parent>
 		<groupId>tec.uom</groupId>
@@ -418,10 +418,14 @@
 	</repositories>
 
 	<distributionManagement>
-		<repository>
+		<!-- <repository>
 			<id>bintray-release</id>
 			<name>oss-jfrog-artifactory-release</name>
 			<url>https://oss.jfrog.org/artifactory/oss-release-local</url>
+		</repository> -->
+		<repository>
+			<id>simscale</id>
+			<url>https://nexus.simscale.com/nexus/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>bintray-snapshot</id>
