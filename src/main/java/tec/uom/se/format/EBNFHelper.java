@@ -33,6 +33,7 @@ import static tec.uom.se.format.ConverterFormatter.formatConverter;
 import tec.uom.se.AbstractUnit;
 import tec.uom.se.unit.AnnotatedUnit;
 import tec.uom.se.unit.BaseUnit;
+import tec.uom.se.unit.ProductUnit;
 import tec.uom.se.unit.TransformedUnit;
 
 import javax.measure.Unit;
@@ -95,8 +96,8 @@ class EBNFHelper {
     final String symbol = symbolMap.getSymbol(unit);
     if (symbol != null) {
       return noopPrecedenceInternal(buffer, symbol);
-    } else if (unit.getBaseUnits() != null) {
-      return productPrecedenceInternal(unit, buffer, symbolMap);
+    } else if (unit instanceof ProductUnit<?>) {
+      return productPrecedenceInternal((ProductUnit<?>) unit, buffer, symbolMap);
     } else if (unit instanceof BaseUnit<?>) {
       return noopPrecedenceInternal(buffer, ((BaseUnit<?>) unit).getSymbol());
     } else if (unit.getSymbol() != null) { // Alternate unit.
@@ -231,19 +232,19 @@ class EBNFHelper {
   }
 
   @SuppressWarnings("unchecked")
-  private static int productPrecedenceInternal(Unit<?> unit, Appendable buffer, SymbolMap symbolMap) throws IOException {
-    Map<Unit<?>, Integer> productUnits = (Map<Unit<?>, Integer>) unit.getBaseUnits();
+  private static int productPrecedenceInternal(ProductUnit<?> productUnit, Appendable buffer, SymbolMap symbolMap) throws IOException {
     int negativeExponentCount = 0;
     // Write positive exponents first...
     boolean start = true;
-    for (Map.Entry<Unit<?>, Integer> e : productUnits.entrySet()) {
-      int pow = e.getValue();
+    for (int i = 0; i < productUnit.getUnitCount(); i++) {
+      int pow = productUnit.getUnitPow(i);
       if (pow >= 0) {
-        formatExponent(e.getKey(), pow, 1, !start, buffer, symbolMap);
+        formatExponent(productUnit.getUnit(i), pow, productUnit.getUnitRoot(i), !start, buffer, symbolMap);
         start = false;
       } else {
         negativeExponentCount += 1;
       }
+
     }
     // ..then write negative exponents.
     if (negativeExponentCount > 0) {
@@ -255,10 +256,10 @@ class EBNFHelper {
         buffer.append('(');
       }
       start = true;
-      for (Map.Entry<Unit<?>, Integer> e : productUnits.entrySet()) {
-        int pow = e.getValue();
+      for (int i = 0; i < productUnit.getUnitCount(); i++) {
+        int pow = productUnit.getUnitPow(i);
         if (pow < 0) {
-          formatExponent(e.getKey(), -pow, 1, !start, buffer, symbolMap);
+          formatExponent(productUnit.getUnit(i), -pow, productUnit.getUnitRoot(i), !start, buffer, symbolMap);
           start = false;
         }
       }
